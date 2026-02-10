@@ -1,0 +1,19 @@
+{
+  "name": "allcll-browser-monitoring",
+  "version": "0.0.1",
+  "description": "",
+  "scripts": {
+    "test": "playwright test",
+    "test:ci": "playwright test --grep-invert @monitoring",
+    "test:monitor": "playwright test --grep @monitoring",
+    "test:debug": "playwright test --debug",
+    "test:report": "playwright show-report",
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.58.2",
+    "@types/node": "^25.2.3",
+    "typescript": "^5.5.3"
+  },
+  "private": true
+}
