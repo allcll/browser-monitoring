@@ -12,6 +12,7 @@ yarn-error.log*
 .idea/*
 
 .DS_Store
+.env
 
 # Playwright
 node_modules/

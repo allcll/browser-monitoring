@@ -9,7 +9,7 @@ test.describe('@monitoring Data Freshness Check', () => {
     ? parseInt(process.env.MAX_DELAY_MS, 10) 
     : 60 * 60 * 1000;
 
-  test.beforeEach(async () => {
+  test.beforeEach(async ({ page }) => {
     // Skip test if outside of schedule
     if (!isWithinSchedule()) {
       test.skip(true, 'Outside of monitoring schedule');
@@ -21,7 +21,7 @@ test.describe('@monitoring Data Freshness Check', () => {
 
     try {
       // 1. Navigate to the target page
-      await page.goto('/');
+      await page.goto('/live');
       
       // Wait for the table to load (adjust selector as needed)
       // Assuming there's a table or list with data-testid="crawl-row"
