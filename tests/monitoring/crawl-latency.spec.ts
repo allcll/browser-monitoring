@@ -9,7 +9,7 @@ test.describe('@monitoring Data Freshness Check', () => {
     ? parseInt(process.env.MAX_DELAY_MS, 10) 
     : 60 * 60 * 1000;
 
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async () => {
     // Skip test if outside of schedule
     if (!isWithinSchedule()) {
       test.skip(true, 'Outside of monitoring schedule');
@@ -36,6 +36,7 @@ test.describe('@monitoring Data Freshness Check', () => {
         });
         throw new Error('No data rows found');
       }
+      await page.waitForTimeout(3000);
 
       const rows = page.getByTestId('crawl-row');
       const count = await rows.count();
