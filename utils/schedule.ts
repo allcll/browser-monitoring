@@ -3,7 +3,7 @@
  * The schedule is defined by environment variables.
  */
 export function isWithinSchedule(): boolean {
-  const now = new Date();
+  const now = getKSTDate();
   
   // 1. Check Date Range
   const startDateStr = process.env.MONITOR_START_DATE;
@@ -42,4 +42,18 @@ export function isWithinSchedule(): boolean {
   }
 
   return true;
+}
+
+/**
+ * kst now 를 반환합니다.
+ * @returns Date
+ */
+function getKSTDate() {
+  const now = new Date();
+  
+  // 현재 시간의 UTC 밀리초를 가져와서 9시간(9 * 60 * 60 * 1000)을 더함
+  const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+  const kstTime = utc + (9 * 60 * 60 * 1000);
+  
+  return new Date(kstTime);
 }
