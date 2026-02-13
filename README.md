@@ -8,7 +8,7 @@
 
 학생들에게 정확한 수강신청 정보를 제공하기 위해, 실제 서비스 환경에서 데이터가 정상적으로 갱신되고 있는지 24시간 감시합니다.
 
----
+
 
 ## 🎯 목적
 
@@ -17,7 +17,7 @@
 *   **CI 테스트 (정적 검증):** 개발 단계에서 상대 시간 UI 로직(예: "5분 전")이 깨지지 않았는지 검증합니다.
 *   **운영 모니터링 (동적 검증):** 실제 운영 환경에서 크롤링 데이터가 허용된 지연 시간 내에 갱신되고 있는지 주기적으로 확인합니다.
 
----
+
 
 ## 🔍 주요 기능
 
@@ -37,7 +37,7 @@
 *   **GitHub Actions**를 통해 수강신청 기간(날짜, 시간)에 맞춰 자동으로 모니터링이 실행됩니다.
 *   장애 발생 시 **Discord Webhook**을 통해 문제의 심각도(INFO, WARNING, CRITICAL)에 따라 알림을 전송합니다.
 
----
+
 
 ## 🛠️ 기술 스택
 
@@ -46,7 +46,7 @@
 *   **CI/CD:** GitHub Actions
 *   **Notification:** Discord Webhook
 
----
+
 
 ## 🚀 시작하기
 
@@ -85,11 +85,13 @@ pnpm test:monitor
 npx playwright test --grep @monitoring
 ```
 
----
+
 
 ## ⚙️ 환경 설정
 
 모니터링 동작은 환경 변수를 통해 제어할 수 있습니다. 수강신청 기간에 맞춰 유연하게 변경 가능합니다.
+
+#### Local 환경 변수 설정
 
 | 변수명 | 설명 | 예시 |
 | :--- | :--- | :--- |
@@ -99,7 +101,25 @@ npx playwright test --grep @monitoring
 | `MONITOR_END_HOUR` | 일일 종료 시간 (0-23) | `17` |
 | `DISCORD_WEBHOOK_URL` | 알림을 받을 Discord Webhook URL | `https://discord.com/...` |
 
----
+### 🐈 Github Actions 환경 변수 설정
+#### 🔐 Secrets
+
+| 변수명 | 필수 여부 | 설명 | 기본값/예사 |
+| :--- | :--- | :--- | :--- |
+| `DISCORD_WEBHOOK_URL` | ✅ | 알림을 받을 Discord Webhook URL | `https://discord.com/...` |
+
+#### 🔰 Variables
+
+| 변수명 | 필수 여부 | 설명 | 기본값/예사 |
+| :--- | :--- | :--- | :--- |
+| `BASE_URL` |  | 모니터링 대상 (URL) | `https://allcll.kr` |
+| `MONITOR_START_DATE` | ✅ | 모니터링 시작일 (YYYY-MM-DD) | `2024-03-01` |
+| `MONITOR_END_DATE` | ✅ | 모니터링 종료일 (YYYY-MM-DD) | `2024-03-05` |
+| `MONITOR_START_HOUR` |  | 일일 시작 시간 (0-23) | `10` |
+| `MONITOR_END_HOUR` |  | 일일 종료 시간 (0-23) | `17` |
+| `MAX_DELAY_MS` |  | 과목 크롤링 지연 시간 Limit (ms) | `3600000` (1 hour) |
+
+
 
 ## 📊 모니터링 로직
 
