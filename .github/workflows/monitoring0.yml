@@ -1,8 +1,8 @@
-name: Browser Monitoring 1
+name: Browser Monitoring 00
 
 on:
   schedule:
-    - cron: '* * * * *'
+    - cron: '0 * * * *'
   workflow_dispatch:
 
 permissions:

@@ -1,0 +1,59 @@
+name: Browser Monitoring 40
+
+on:
+  schedule:
+    - cron: '40 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10 # Prevent hanging jobs
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+
+      - name: Install dependencies
+        run: npm install -g pnpm && pnpm install
+
+      - name: Install Playwright Browsers
+        run: pnpm exec playwright install chromium
+
+      - name: Run Monitoring Tests
+        env:
+          # Secrets
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          
+          # Configuration Variables (GitHub Vars or defaults)
+          BASE_URL: ${{ vars.BASE_URL || 'https://allcll.kr' }}
+          MONITOR_START_DATE: ${{ vars.MONITOR_START_DATE }}
+          MONITOR_END_DATE: ${{ vars.MONITOR_END_DATE }}
+          MONITOR_START_HOUR: ${{ vars.MONITOR_START_HOUR || '10' }}
+          MONITOR_END_HOUR: ${{ vars.MONITOR_END_HOUR || '17' }}
+          MONITOR_TIMEZONE: 'Asia/Seoul'
+          MAX_DELAY_MS: ${{ vars.MAX_DELAY_MS || '3600000' }} # 1 hour default
+        run: |
+          pnpm test:monitor
+
+      - name: Upload Test Report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 3
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./playwright-report
