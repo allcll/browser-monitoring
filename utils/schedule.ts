@@ -25,12 +25,12 @@ export function isWithinSchedule(): boolean {
 
   // 2. Check Day of Week (Mon-Fri)
   // 0 = Sunday, 6 = Saturday
-  const day = now.getDay();
-  if (day === 0 || day === 6) {
+  // const day = now.getDay();
+  // if (day === 0 || day === 6) {
     // Optional: Allow override via env var if needed, but per requirements Mon-Fri only.
     // If we want to support weekend monitoring later, we can add a flag.
-    return false;
-  }
+    // return false;
+  // }
 
   // 3. Check Time Range (Hour)
   const startHour = parseInt(process.env.MONITOR_START_HOUR || '10', 10);
