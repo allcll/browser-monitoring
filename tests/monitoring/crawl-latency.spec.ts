@@ -16,7 +16,7 @@ test.describe('@monitoring Data Freshness Check', () => {
     }
   });
 
-  test('should have up-to-date crawling data', async ({ page }) => {
+  test('should have up-to-date crawling data', async ({ page }, testInfo) => {
     const alerts: AlertItem[] = [];
 
     try {
@@ -32,9 +32,9 @@ test.describe('@monitoring Data Freshness Check', () => {
         // If no rows found, it might be a critical failure (empty list)
         alerts.push({
           severity: 'CRITICAL',
-          message: 'No data rows found on the page. Possible system failure or empty state.',
+          message: '전광판 페이지에서 데이터 행이 발견되지 않았습니다. 시스템 장애 또는 빈 상태일 수 있습니다.',
         });
-        throw new Error('No data rows found');
+        throw new Error('데이터 행이 없습니다');
       }
       await page.waitForTimeout(3000);
 
@@ -54,7 +54,7 @@ test.describe('@monitoring Data Freshness Check', () => {
         if (!crawledAtStr) {
           alerts.push({
             severity: 'WARNING',
-            message: 'Missing data-crawled-at attribute',
+            message: '전광판 페이지에서 data-crawled-at 속성을 가진 행이 누락되었습니다.',
             rowId,
           });
           continue;
@@ -70,7 +70,7 @@ test.describe('@monitoring Data Freshness Check', () => {
           if (staleCount <= 5) {
             alerts.push({
               severity: 'WARNING',
-              message: `Data is stale. Delay: ${Math.floor(diff / 1000 / 60)} min`,
+              message: `전광판의 데이터가 오래되었습니다. 지연 시간:  ${Math.floor(diff / 1000 / 60)} 분`,
               rowId,
               timestamp: crawledAt,
             });
@@ -85,7 +85,7 @@ test.describe('@monitoring Data Freshness Check', () => {
       if (count > 0 && validCount === 0) {
         alerts.push({
           severity: 'CRITICAL',
-          message: 'ALL data rows are stale. SSE connection or Crawler might be down.',
+          message: '전광판의 모든 행의 데이터가 오래되었습니다. SSE 연결 또는 크롤러가 다운되었을 수 있습니다.',
         });
       }
 
@@ -93,12 +93,18 @@ test.describe('@monitoring Data Freshness Check', () => {
       console.error('Test execution failed:', error);
       alerts.push({
         severity: 'CRITICAL',
-        message: `Test execution failed: ${(error as Error).message}`,
+        message: `테스트 실행 실패: ${(error as Error).message}`,
       });
     } finally {
       // 3. Send Alerts if any
       if (alerts.length > 0) {
-        await sendDiscordAlert(alerts);
+        const maxRetries = testInfo.project.retries ?? 0;
+        const isFinalAttempt = testInfo.retry === maxRetries;
+
+        // Send only once after all retries are exhausted.
+        if (isFinalAttempt) {
+          await sendDiscordAlert(alerts);
+        }
         
         // Fail the test if there are any alerts
         // This ensures the CI job status reflects the monitoring status
