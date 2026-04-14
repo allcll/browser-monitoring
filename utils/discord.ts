@@ -34,6 +34,7 @@ export async function sendDiscordAlert(alerts: AlertItem[]) {
     color = 0xe74c3c; // Red (CRITICAL)
     title = '🚨 CRITICAL ALERT: Data Stale or System Failure';
   } else if (isWarning) {
+
     color = 0xf1c40f; // Yellow (WARNING)
     title = '⚠️ Warning: Potential Issues Detected';
   }
@@ -44,7 +45,9 @@ export async function sendDiscordAlert(alerts: AlertItem[]) {
     const timeStr = alert.timestamp ? `<t:${Math.floor(alert.timestamp / 1000)}:R>` : '';
     const rowInfo = alert.rowId ? `(Row: ${alert.rowId})` : '';
     return `${icon} **[${alert.severity}]** ${alert.message} ${timeStr} ${rowInfo}`;
-  }).join('\n');
+  })
+  .filter((v, i, a) => a.indexOf(v) === i) // Remove duplicates
+  .join('\n');
 
   const payload = {
     embeds: [
