@@ -1,59 +1,42 @@
 /**
  * Checks if the current time is within the monitoring schedule.
- * The schedule is defined by environment variables.
  */
 export function isWithinSchedule(): boolean {
   const now = getKSTDate();
-  
-  // 1. Check Date Range
-  const startDateStr = process.env.MONITOR_START_DATE;
-  const endDateStr = process.env.MONITOR_END_DATE;
 
-  if (startDateStr) {
-    const startDate = new Date(startDateStr);
-    // Reset time to start of day for accurate comparison
-    startDate.setHours(0, 0, 0, 0);
-    if (now < startDate) return false;
+  // YYYY-MM-DD 형식으로 변환
+  const kstDateStr = now.getUTCFullYear() + '-' + 
+                     String(now.getUTCMonth() + 1).padStart(2, '0') + '-' + 
+                     String(now.getUTCDate()).padStart(2, '0');
+  const kstHour = now.getUTCHours();
+
+  console.log(`[Schedule Check] KST: ${kstDateStr} ${kstHour}시`);
+
+  // 1. 날짜 범위 체크 (Date 객체로 변환하여 안전하게 비교)
+  const { MONITOR_START_DATE, MONITOR_END_DATE } = process.env;
+
+  if (MONITOR_START_DATE) {
+    const start = new Date(MONITOR_START_DATE.trim());
+    if (!isNaN(start.getTime()) && new Date(kstDateStr) < start) return false;
+  }
+  if (MONITOR_END_DATE) {
+    const end = new Date(MONITOR_END_DATE.trim());
+    if (!isNaN(end.getTime()) && new Date(kstDateStr) > end) return false;
   }
 
-  if (endDateStr) {
-    const endDate = new Date(endDateStr);
-    // Set time to end of day
-    endDate.setHours(23, 59, 59, 999);
-    if (now > endDate) return false;
-  }
-
-  // 2. Check Day of Week (Mon-Fri)
-  // 0 = Sunday, 6 = Saturday
-  // const day = now.getDay();
-  // if (day === 0 || day === 6) {
-    // Optional: Allow override via env var if needed, but per requirements Mon-Fri only.
-    // If we want to support weekend monitoring later, we can add a flag.
-    // return false;
-  // }
-
-  // 3. Check Time Range (Hour)
+  // 2. 시간 범위 체크
   const startHour = parseInt(process.env.MONITOR_START_HOUR || '10', 10);
   const endHour = parseInt(process.env.MONITOR_END_HOUR || '17', 10);
-  const currentHour = now.getHours();
 
-  if (currentHour < startHour || currentHour >= endHour) {
-    return false;
-  }
-
-  return true;
+  return !(kstHour < startHour || kstHour >= endHour);
 }
 
 /**
- * kst now 를 반환합니다.
- * @returns Date
+ * 한국 시간(KST)을 계산하기 위해 UTC+9시간이 더해진 Date 객체를 반환합니다.
+ * 이 객체는 반드시 getUTC... 메서드로 읽어야 합니다.
  */
 function getKSTDate() {
   const now = new Date();
-  
-  // 현재 시간의 UTC 밀리초를 가져와서 9시간(9 * 60 * 60 * 1000)을 더함
-  const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
-  const kstTime = utc + (9 * 60 * 60 * 1000);
-  
-  return new Date(kstTime);
+  // UTC 기준 밀리초에 9시간을 더함
+  return new Date(now.getTime() + (9 * 60 * 60 * 1000));
 }
